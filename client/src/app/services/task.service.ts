@@ -1,26 +1,42 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Task } from '../models/task.model';
 
-@Injectable({ providedIn: 'root' })
+const baseUrl = 'http://localhost:8000/api/';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class TaskService {
-  private apiUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {}
 
-  getTasks(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/tasks`);
+  getAll(): Observable<Task[]> {
+    return this.http.get<Task[]>(`${baseUrl}/tasks`);
   }
 
-  addTask(task: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/task`, task);
+  get(id: any): Observable<Task> {
+    return this.http.get<Task>(`${baseUrl}/task/${id}`);
   }
 
-  updateTask(id: string, task: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/task/${id}`, task);
+  create(data: any): Observable<any> {
+    return this.http.post(`${baseUrl}/task `, data);
   }
 
-  deleteTask(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/task/${id}`);
+  update(id: any, data: any): Observable<any> {
+    return this.http.put(`${baseUrl}/task/update/${id}`, data);
+  }
+
+  delete(id: any): Observable<any> {
+    return this.http.delete(`${baseUrl}/task/${id}`);
+  }
+
+  deleteAll(): Observable<any> {
+    return this.http.delete(baseUrl);
+  }
+
+  findByAssignedTo(assignedTo: string): Observable<Task[]> {
+    return this.http.get<Task[]>(`${baseUrl}?assignedTo=${assignedTo}`);
   }
 }

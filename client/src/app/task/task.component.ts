@@ -1,92 +1,68 @@
-import { Component, OnInit } from '@angular/core';  
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup,ReactiveFormsModule } from '@angular/forms';
+import { TaskService } from '../services/task.service';
+import { Task } from '../models/task.model';
 
-interface Task {  
-  assignedTo: string;  
-  status: string;  
-  dueDate: string;  
-  priority: string;  
-  comments: string;  
-  showActions?: boolean; // for dropdown menu toggle  
-  selected?: boolean; // for checkbox  
-}  
+import { firstValueFrom } from 'rxjs';
+@Component({
+  selector: 'app-task',
+  standalone: true,
+  imports: [CommonModule,ReactiveFormsModule],
+  templateUrl: './task.component.html',
+  styleUrls: ['./task.component.css']
+})
+export class TaskComponent {
+  taskForm: FormGroup;
+  UserData: Task[] = [];  
+  constructor(private fb: FormBuilder, private TaskService: TaskService) {
+    this.taskForm = this.fb.group({
+      taskDueDate: [''],
+      assignedTo: [''],
+      status: [''],
+      priority: [''],
+      comments: ['']
+    });
+  }
 
-@Component({  
-  selector: 'app-task',  
-  templateUrl: './task.component.html',  
-  styleUrls: ['./task.component.css']  
-})  
-export class TaskComponent implements OnInit {  
-  tasks: Task[] = [];  
-  searchTerm: string = '';  
-  sortColumn: string = '';  
-  sortDirection: 'asc' | 'desc' = 'asc';  
+  onSubmit(): void {
+    if (this.taskForm.valid) {
+      // Prepare the task object
+      const task: Task = {
+      
+        dueDate: this.taskForm.value.taskDueDate,
+        assignedTo: this.taskForm.value.assignedTo,
+        status: this.taskForm.value.status,
+        priority: this.taskForm.value.priority,
+        comments: this.taskForm.value.comments
+      };
 
-  ngOnInit() {  
-    // Initialize with sample data  
-    this.tasks = [  
-      { assignedTo: 'User 1', status: 'Completed', dueDate: '2024-12-10', priority: 'Low', comments: 'This task is good' },  
-      { assignedTo: 'User 2', status: 'In Progress', dueDate: '2024-09-14', priority: 'High', comments: 'This...' },  
-      { assignedTo: 'User 3', status: 'Not Started', dueDate: '2024-08-18', priority: 'Low', comments: 'This...' },  
-      { assignedTo: 'User 4', status: 'In Progress', dueDate: '2024-06-12', priority: 'Normal', comments: 'This...' },  
-    ];  
-  }  
+    
+      this.TaskService.create(task).subscribe({
+        next: (response) => {
+          console.log('Task created successfully:', response);
 
-  toggleActions(task: Task) {  
-    task.showActions = !task.showActions;  
-  }  
+          this.taskForm.reset();
+        },
+        error: (error) => {
+          console.error('There was an error!', error);
+      
+        }
+      });
+    } else {
+      console.log('Form is invalid');
+    }
+  }
 
-  createTask() {  
-    // Logic to create task  
-    alert('Create New Task clicked');  
-  }  
-
-  refresh() {  
-    // Logic to refresh  
-    alert('Refresh clicked');  
-  }  
-
-  deleteTask(task: Task) {  
-    this.tasks = this.tasks.filter(t => t !== task);  
-  }  
-
-  editTask(task: Task) {  
-    // Logic to edit task  
-    alert(`Edit task assigned to ${task.assignedTo}`);  
-  }  
-
-  toggleSelectAll(event: any) {  
-    const isChecked = event.target.checked;  
-    this.tasks.forEach(task => task.selected = isChecked);  
-  }  
-
-  filteredTasks() : Task[] {  
-    let filtered = this.tasks.filter(task =>  
-      task.assignedTo.toLowerCase().includes(this.searchTerm.toLowerCase()) ||  
-      task.status.toLowerCase().includes(this.searchTerm.toLowerCase()) ||  
-      task.comments.toLowerCase().includes(this.searchTerm.toLowerCase())  
-    );  
-
-    if (this.sortColumn) {  
-      filtered.sort((a, b) => {  
-        const aVal = (a as any)[this.sortColumn];  
-        const bVal = (b as any)[this.sortColumn];  
-
-        if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;  
-        if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;  
-        return 0;  
-      });  
-    }  
-
-    return filtered;  
-  }  
-
-  sort(column: string) {  
-    if (this.sortColumn === column) {  
-      // toggle direction  
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';  
-    } else {  
-      this.sortColumn = column;  
-      this.sortDirection = 'asc';  
-    }  
-  }  
-}  
+  async getData(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.TaskService.getAll()); // Use firstValueFrom to get the first emitted value
+      console.log('Data:', data);  // Log data for debugging
+      if (data && data.length > 0) {
+        this.UserData = data;  // Assign the data to UserData property
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);  // Handle any errors
+    }
+  }
+}
