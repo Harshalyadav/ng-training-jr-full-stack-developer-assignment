@@ -1,0 +1,44 @@
+<div class="task-container">  
+    <!-- Buttons -->  
+    <div class="header-buttons">  
+      <button class="btn primary" (click)="createTask()">New Task</button>  
+      <button class="btn secondary" (click)="refresh()">Refresh</button>  
+    </div>  
+  
+    <!-- Search -->  
+    <input type="text" placeholder="Search" [(ngModel)]="searchTerm" class="search-box">  
+  
+    <!-- Task Table -->  
+    <table class="task-table">  
+      <thead>  
+        <tr>  
+          <th><input type="checkbox" (change)="toggleSelectAll($event)"></th>  
+          <th (click)="sort('assignedTo')">Assigned To</th>  
+          <th (click)="sort('status')">Status</th>  
+          <th (click)="sort('dueDate')">Due Date</th>  
+          <th (click)="sort('priority')">Priority</th>  
+          <th>Comments</th>  
+          <th>Actions</th>  
+        </tr>  
+      </thead>  
+      <tbody>  
+        <tr *ngFor="let task of filteredTasks()">  
+          <td><input type="checkbox" [(ngModel)]="task.selected"></td>  
+          <td>{{task.assignedTo}}</td>  
+          <td>{{task.status}}</td>  
+          <td>{{task.dueDate}}</td>  
+          <td>{{task.priority}}</td>  
+          <td>{{task.comments}}</td>  
+          <td>  
+            <div class="actions-dropdown">  
+              <button (click)="toggleActions(task)">Actions</button>  
+              <div class="dropdown-menu" *ngIf="task.showActions">  
+                <button (click)="editTask(task)">Edit</button>  
+                <button (click)="deleteTask(task)">Delete</button>  
+              </div>  
+            </div>  
+          </td>  
+        </tr>  
+      </tbody>  
+    </table>  
+  </div>  
