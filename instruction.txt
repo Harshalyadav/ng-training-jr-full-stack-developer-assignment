@@ -1,0 +1,5 @@
+While creating a GitLab repo, ensure naming convention as follows,
+“ng-training-”(followed by assignment name)
+Example: ng-training-assignment -1
+
+ng-training-jr-full-stack-developer-assignment
